@@ -1,0 +1,133 @@
+//FrameExample class
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.swing.*;
+import java.io.File;
+
+public class FrameExample {
+    public static void main (String []args) throws Exception
+    {
+        Board b = new Board();
+
+                                                  //C211017
+        JFrame f = new JFrame();
+        f.setSize(1024, 550);
+        f.add(b);
+        f.setVisible(true);
+        AudioInputStream a = AudioSystem.getAudioInputStream(new File("backgroundSound.wav"));
+        Clip clip = AudioSystem.getClip();
+        clip.open(a);
+        clip.loop(-1);
+
+        f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    }
+}
+
+//Board class
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+
+
+public class Board extends JPanel {
+
+    Image background;
+    Car car  = new Car ();
+    Board()
+    {
+        ImageIcon imageIcon = new ImageIcon("background.png");
+        background = imageIcon.getImage();
+
+        addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                super.keyPressed(e);
+                try {
+                    car.move(e);
+                }
+               catch (Exception exception)
+               {
+                   exception.printStackTrace();
+               }
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {
+                super.keyReleased(e);
+             car.stop();
+                //car.carImage = car.carStopImage;
+            }
+        });
+        setFocusable (true);
+    }
+    @Override
+    public void paint(Graphics g)
+    {
+        super.paint(g);
+        g.drawImage(background,  0, 0, this);
+        g.drawImage(car.carImage, car.x , car.y, this);
+        repaint();
+    }
+}
+
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.swing.*;
+import javax.sound.sampled.Clip;
+import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.io.File;
+                                                                   //C211017
+public class Car {
+    Image carImage;
+    Image carStopImage;
+    Image carRunningRight;
+    ImageIcon carImageIcon;
+    //Clip player = null;
+    int x;
+    int y;
+    AudioInputStream carRunningSound;
+    Clip player;
+    Car ()
+    {
+        carImageIcon = new ImageIcon( "car.png");
+        carStopImage = carImageIcon.getImage();
+
+        carImageIcon = new ImageIcon( "still.gif");
+        carRunningRight = carImageIcon.getImage();
+
+        carImage = carStopImage;
+        x= 120;
+        y= 450;
+
+    }
+    void move (KeyEvent e) throws Exception {
+        if (e.getKeyCode() == 39)
+            x = x + 5;
+        if (e.getKeyCode() == 37)
+            x = x - 5;
+
+        if (e.getKeyCode() == 40)
+            y = y + 5;
+        if (e.getKeyCode() == 38)
+            y = y - 5;
+
+        carImage = carRunningRight;
+     ////Sound Add
+        carRunningSound = AudioSystem.getAudioInputStream(new File("car_drive_sound.wav").getAbsoluteFile());
+        player = AudioSystem.getClip();
+        //Clip player = AudioSystem.getClip();
+        player.open(carRunningSound);
+        player.start();
+    }
+
+        void stop ()
+        {
+        carImage = carStopImage;
+        player.stop ();
+        player.setFramePosition(0);
+        }
+
+}
